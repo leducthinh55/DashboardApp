@@ -10,7 +10,6 @@ namespace DashboardAppTest
     [TestClass]
     public class TaskAPITest
     {
-
         [Test]
         public async Task ShouldCreateTask()
         {

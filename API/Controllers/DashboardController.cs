@@ -3,7 +3,6 @@ using Application.Dashboards.Commands.CreateDashboard;
 using Application.Dashboards.Commands.DeleteDashboard;
 using Application.Dashboards.Queries.GetDashboardDetail;
 using Application.Dashboards.Queries.GetListDashboard;
-using DashboardApp.API.Controllers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,12 +16,19 @@ namespace API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class DashboardController : ApiControllerBase
+    public class DashboardController : ControllerBase
     {
+        private readonly IMediator _mediator;
+
+        public DashboardController(IMediator mediator)
+        {
+            this._mediator = mediator;
+        }
+
         [HttpPost]
         public async Task<ActionResult<ResultModel>> Create(CreateDashboardCommand command)
         {
-            return await Mediator.Send(command);
+            return await _mediator.Send(command);
         }
 
         [HttpPut("{id}")]
@@ -33,7 +39,7 @@ namespace API.Controllers
                 return BadRequest();
             }
 
-            var resultModel = await Mediator.Send(command);
+            var resultModel = await _mediator.Send(command);
 
             if (resultModel.IsSucceeded())
             {
@@ -49,7 +55,7 @@ namespace API.Controllers
             {
                 Id = id
             };
-            var resultModel = await Mediator.Send(command);
+            var resultModel = await _mediator.Send(command);
             if (resultModel.IsSucceeded())
             {
                 return Ok(resultModel);
@@ -64,7 +70,7 @@ namespace API.Controllers
             {
                 Keyword = keyword
             };
-            var resultModel = await Mediator.Send(command);
+            var resultModel = await _mediator.Send(command);
             if (resultModel.IsSucceeded())
             {
                 return Ok(resultModel);
@@ -79,7 +85,7 @@ namespace API.Controllers
             {
                 Id = id
             };
-            var resultModel = await Mediator.Send(command);
+            var resultModel = await _mediator.Send(command);
             if (resultModel.IsSucceeded())
             {
                 return NoContent();

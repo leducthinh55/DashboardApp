@@ -1,5 +1,5 @@
 ﻿using Application.Reports.Queries.GetReportTaskProgress;
-using DashboardApp.API.Controllers;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -10,15 +10,21 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ReportController : ApiControllerBase
+    public class ReportController : ControllerBase
     {
+        private readonly IMediator _mediator;
+
+        public ReportController(IMediator mediator)
+        {
+            this._mediator = mediator;
+        }
         [HttpGet("task/completed")]
         public async Task<ActionResult> GetContact()
         {
             var command = new GetReportTaskProgressQuery()
             {
             };
-            var resultModel = await Mediator.Send(command);
+            var resultModel = await _mediator.Send(command);
             if (resultModel.IsSucceeded())
             {
                 return Ok(resultModel);

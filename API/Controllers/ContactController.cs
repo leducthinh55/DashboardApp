@@ -4,7 +4,7 @@ using Application.Contacts.Commands.DeleteContact;
 using Application.Contacts.Queries.ExportContact;
 using Application.Contacts.Queries.GetContactDetail;
 using Application.Contacts.Queries.GetListContact;
-using DashboardApp.API.Controllers;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,8 +20,14 @@ namespace API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class ContactController : ApiControllerBase
+    public class ContactController : ControllerBase
     {
+        private readonly IMediator _mediator;
+
+        public ContactController(IMediator mediator)
+        {
+            this._mediator = mediator;
+        }
         /// <summary>
         /// create contact
         /// </summary>
@@ -30,7 +36,7 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<ResultModel>> Create(CreateContactCommand command)
         {
-            return await Mediator.Send(command);
+            return await _mediator.Send(command);
         }
 
         /// <summary>
@@ -47,7 +53,7 @@ namespace API.Controllers
                 return BadRequest();
             }
 
-            var resultModel = await Mediator.Send(command);
+            var resultModel = await _mediator.Send(command);
 
             if (resultModel.IsSucceeded())
             {
@@ -68,7 +74,7 @@ namespace API.Controllers
             {
                 Id = id
             };
-            var resultModel = await Mediator.Send(command);
+            var resultModel = await _mediator.Send(command);
             if (resultModel.IsSucceeded())
             {
                 return Ok(resultModel);
@@ -88,7 +94,7 @@ namespace API.Controllers
             {
                 Keyword = keyword
             };
-            var resultModel = await Mediator.Send(command);
+            var resultModel = await _mediator.Send(command);
             if (resultModel.IsSucceeded())
             {
                 return Ok(resultModel);
@@ -108,7 +114,7 @@ namespace API.Controllers
             {
                 Id = id
             };
-            var resultModel = await Mediator.Send(command);
+            var resultModel = await _mediator.Send(command);
             if (resultModel.IsSucceeded())
             {
                 return NoContent();
@@ -125,7 +131,7 @@ namespace API.Controllers
         public async Task<ActionResult> ExportContactByCsv()
         {
             var command = new GetContactCsvQuery();
-            var fileSupport = await Mediator.Send(command);
+            var fileSupport = await _mediator.Send(command);
 
             return File(fileSupport.Stream, fileSupport.ContentType, fileSupport.FileName);
         }
@@ -140,7 +146,7 @@ namespace API.Controllers
         {
             var command = new ImportContactCommand() { File = file };
 
-            var resultModel = await Mediator.Send(command);
+            var resultModel = await _mediator.Send(command);
 
             if (resultModel.IsSucceeded())
             {

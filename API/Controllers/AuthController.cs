@@ -4,7 +4,6 @@ using Application.Accounts.Commands.UpdateAccount;
 using Application.Accounts.Queries.GetRefreshToken;
 using Application.Accounts.Queries.LoginAccount;
 using Application.Common.Models;
-using DashboardApp.API.Controllers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,12 +16,19 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController : ApiControllerBase
+    public class AuthController : ControllerBase
     {
+        private readonly IMediator _mediator;
+
+        public AuthController(IMediator _mediator)
+        {
+            this._mediator = _mediator;
+        }
+
         [HttpPost("register")]
         public async Task<ActionResult<ResultModel>> Create(CreateAccountCommand command)
         {
-            return await Mediator.Send(command);
+            return await _mediator.Send(command);
         }
 
         [Authorize]
@@ -34,7 +40,7 @@ namespace API.Controllers
                 return BadRequest();
             }
 
-            var resultModel = await Mediator.Send(command);
+            var resultModel = await _mediator.Send(command);
 
             if (resultModel.IsSucceeded())
             {
@@ -50,7 +56,7 @@ namespace API.Controllers
             {
                 Id = id
             };
-            var resultModel = await Mediator.Send(command);
+            var resultModel = await _mediator.Send(command);
             if (resultModel.IsSucceeded())
             {
                 return Ok("User is verification");
@@ -61,7 +67,7 @@ namespace API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult> Login(LoginAccountCommand command)
         {
-            var account = await Mediator.Send(command);
+            var account = await _mediator.Send(command);
             return Ok(account);
         }
 
@@ -72,7 +78,7 @@ namespace API.Controllers
             {
                 Token = refreshToken
             };
-            var token = await Mediator.Send(command);
+            var token = await _mediator.Send(command);
             return Ok(token);
         }
 
@@ -81,7 +87,7 @@ namespace API.Controllers
         public async Task<ActionResult> Logout()
         {
             var command = new LogoutAccountCommand() { };
-            var token = await Mediator.Send(command);
+            var token = await _mediator.Send(command);
             return Ok(token);
         }
     }

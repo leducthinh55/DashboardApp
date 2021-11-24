@@ -4,7 +4,7 @@ using Application.Tasks.Commands.CreateTask;
 using Application.Tasks.Commands.DeleteTask;
 using Application.Tasks.Queries.GetListTask;
 using Application.Tasks.Queries.GetTaskDetail;
-using DashboardApp.API.Controllers;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -17,12 +17,19 @@ namespace API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class TaskController : ApiControllerBase
+    public class TaskController : ControllerBase
     {
+        private readonly IMediator _mediator;
+
+        public TaskController(IMediator mediator)
+        {
+            this._mediator = mediator;
+        }
+
         [HttpPost]
         public async Task<ActionResult<ResultModel>> Create(CreateTaskCommand command)
         {
-            return await Mediator.Send(command);
+            return await _mediator.Send(command);
         }
 
         [HttpPut("{id}")]
@@ -33,7 +40,7 @@ namespace API.Controllers
                 return BadRequest();
             }
 
-            var resultModel = await Mediator.Send(command);
+            var resultModel = await _mediator.Send(command);
 
             if (resultModel.IsSucceeded())
             {
@@ -49,7 +56,7 @@ namespace API.Controllers
             {
                 Id = id
             };
-            var resultModel = await Mediator.Send(command);
+            var resultModel = await _mediator.Send(command);
             if (resultModel.IsSucceeded())
             {
                 return Ok(resultModel);
@@ -64,7 +71,7 @@ namespace API.Controllers
             {
                 Keyword = keyword
             };
-            var resultModel = await Mediator.Send(command);
+            var resultModel = await _mediator.Send(command);
             if (resultModel.IsSucceeded())
             {
                 return Ok(resultModel);
@@ -79,7 +86,7 @@ namespace API.Controllers
             {
                 Id = id
             };
-            var resultModel = await Mediator.Send(command);
+            var resultModel = await _mediator.Send(command);
             if (resultModel.IsSucceeded())
             {
                 return NoContent();

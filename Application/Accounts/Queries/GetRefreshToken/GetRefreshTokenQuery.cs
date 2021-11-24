@@ -56,7 +56,7 @@ namespace Application.Accounts.Queries.GetRefreshToken
 
             await _context.SaveChangesAsync(cancellationToken);
             var token = _jwtTokenService.CreateToken(account);
-            resultModel.Succeeded(new { token = token, refreshToken = refreshToken });
+            resultModel.Succeeded(new { token = token, refreshToken = newRefreshToken });
 
             return resultModel;
         }
