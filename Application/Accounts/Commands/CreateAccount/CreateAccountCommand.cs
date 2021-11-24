@@ -6,6 +6,7 @@ using DashboardApp.Domain.Entities;
 using Domain.Enums;
 using Domain.MailModels;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,12 +50,25 @@ namespace Application.Accounts.Commands.CreateAccount
             var entity = _mapper.Map<CreateAccountCommand, Account>(request);
             entity.Password = password;
 
-            await _context.Accounts.AddAsync(entity);
-            int result = await _context.SaveChangesAsync(cancellationToken);
-            if (result == 0)
+            try
             {
-                resultModel.Failure((int)ProcessStatus.Fail);
+                await _context.Accounts.AddAsync(entity);
+                int result = await _context.SaveChangesAsync(cancellationToken);
+                if (result == 0)
+                {
+                    resultModel.Failure((int)ProcessStatus.Fail);
+                }
             }
+            catch (Exception e)
+            {
+                //Duplicate
+                if (e is DbUpdateException dbUpdateEx)
+                {
+                    resultModel.Failure((int)ProcessStatus.Duplicated);
+                    return resultModel;
+                }
+            }
+
             resultModel.Succeeded(entity.Id);
             // send mail to verification
             var message = new Message()
